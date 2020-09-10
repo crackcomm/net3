@@ -1,0 +1,15 @@
+[workspace]
+members = [
+  "channel",
+  "codec/json-lines",
+  "codec/msgpack",
+  "message",
+  "proto/jsonrpc",
+  "rpc/conn",
+  "rpc/conn/handler",
+  "rpc/client",
+  "rpc/derive",
+  "rpc/examples",
+  "rpc/error",
+  "rpc/server",
+]

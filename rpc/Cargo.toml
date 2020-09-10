@@ -1,0 +1,14 @@
+[package]
+name = "net3_rpc"
+version = "0.1.0"
+authors = ["Łukasz Kurowski <crackcomm@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "*"
+# err-derive = "^0.2.4"
+
+# ice_net_message = { path = "../message" }
+# ice_net_channel = { path = "../channel" }

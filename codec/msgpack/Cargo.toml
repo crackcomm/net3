@@ -1,0 +1,18 @@
+[package]
+name = "net3_codec_msgpack"
+version = "0.1.0"
+authors = ["Łukasz Kurowski <crackcomm@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+# failure = "^0.1.7"
+# err-convert-macro = "^0.1.1"
+
+bytes = "^0.5.6"
+
+serde = "^1.0"
+rmp-serde = "^0.14.3"
+
+tokio = "^0.2.21"
+tokio-util = { version = "^0.3.1", features = ["codec"] }
+

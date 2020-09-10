@@ -1,0 +1,15 @@
+[package]
+name = "net3_codec_json_lines"
+version = "0.1.0"
+authors = ["Łukasz Kurowski <crackcomm@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+log = "^0.4"
+
+bytes = "^0.5.6"
+
+serde = "^1.0"
+serde_json = { version = "^1.0", features = ["raw_value"] }
+
+tokio-util = { version = "^0.3.1", features = ["codec"] }
