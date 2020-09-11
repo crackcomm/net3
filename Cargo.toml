@@ -11,5 +11,6 @@ members = [
   "rpc/derive",
   "rpc/examples",
   "rpc/error",
+  "rpc/pubsub",
   "rpc/server",
 ]

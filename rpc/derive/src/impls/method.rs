@@ -61,10 +61,14 @@ pub fn parse_method_attrs(
                             Ok(attr) => attr,
                             Err(err) => return Err(err.to_compile_error()),
                         };
-                        match MethodAttr::from_meta(&meta) {
-                            Ok(attr) => Ok((Some(attr), forward)),
-                            Err(err) => Err(err.write_errors()),
-                        }
+                        let attr = match meta {
+                            Meta::Path(_) => MethodAttr::default(),
+                            meta => match MethodAttr::from_meta(&meta) {
+                                Ok(attr) => attr,
+                                Err(err) => return Err(err.write_errors()),
+                            },
+                        };
+                        Ok((Some(attr), forward))
                     }
                     _ => {
                         forward.push(attr.clone());

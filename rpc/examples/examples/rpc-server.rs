@@ -1,6 +1,5 @@
 use net3_msg::compact::Message;
 use net3_rpc_client::Handle;
-use net3_rpc_error::Error;
 use net3_rpc_examples::{Rpc, RpcHandler};
 use net3_rpc_server::{Handler, HandlerBuilder};
 
@@ -46,14 +45,9 @@ impl Handler for MyHandler {
                 println!("Response: {:?}", msg);
                 Ok(vec![msg])
             }
-            Err(Error::Io(err)) => {
+            Err(err) => {
                 println!("Io error: {:?}", err);
                 Err(err)
-            }
-            Err(Error::Rpc(err)) => {
-                println!("Rpc error: {:?}", err);
-                // TODO
-                Ok(vec![])
             }
         }
     }

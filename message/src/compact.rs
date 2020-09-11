@@ -6,13 +6,11 @@ use serde::ser::Serialize;
 pub struct Message {
     kind: types::MessageKind,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    error: Option<types::ErrorKind>,
+    error: Option<types::Error>,
     #[serde(default, skip_serializing_if = "types::Id::is_none")]
     id: types::Id,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     data: Option<String>,
 }
@@ -50,18 +48,17 @@ impl traits::Read for Message {
 
 impl traits::Error for Message {
     fn error_kind(&self) -> Option<&types::ErrorKind> {
-        self.error.as_ref()
+        self.error.as_ref().map(|err| &err.kind)
     }
 
     fn description(&self) -> Option<&str> {
-        self.description.as_deref()
+        self.error
+            .as_ref()
+            .and_then(|err| err.description.as_deref())
     }
 
     fn into_error(self) -> Option<types::Error> {
-        self.error.map(|kind| types::Error {
-            kind,
-            description: self.description,
-        })
+        self.error
     }
 }
 
@@ -77,9 +74,8 @@ impl builder::MessageBuilder<Message> for Message {
             kind,
             id: types::Id::Null,
             name: None,
-            error: None,
             data: None,
-            description: Default::default(),
+            error: None,
         }
     }
 
@@ -93,11 +89,10 @@ impl builder::MessageBuilder<Message> for Message {
 
     fn new_error_response(request: &Message, error: types::Error) -> Self {
         let mut msg = Self::new(types::MessageKind::ErrorResponse);
-        msg.error = Some(error.kind);
         msg.id = request.id.clone();
         // Some protocols want this:
         // msg.name = request.name.clone();
-        msg.description = error.description;
+        msg.error = Some(error);
         msg
     }
 
@@ -128,7 +123,6 @@ impl builder::MessageBuilder<Message> for Message {
             name: self.name,
             error: self.error,
             data: self.data,
-            description: self.description,
         }
     }
 }

@@ -11,7 +11,7 @@ pub struct MyMessage {
 /// Example RPC trait.
 #[rpc]
 pub trait Rpc {
-    #[rpc(name = "login")]
+    #[rpc]
     async fn login(&mut self, msg: &MyMessage) -> Result<MyMessage>;
 
     #[rpc(name = "getjobtemplate")]

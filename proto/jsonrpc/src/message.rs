@@ -173,8 +173,8 @@ impl MessageBuilder<Message> for Message {
                 code: ErrorCode(error.kind),
                 data: None,
             }),
-            // Default parameters
             id: request.id.clone(),
+            // Default parameters
             method: None,
             result: Params::empty(),
             params: Params::empty(),
@@ -184,6 +184,12 @@ impl MessageBuilder<Message> for Message {
     fn build(self) -> Message {
         self
     }
+}
+
+impl traits::Message for Message {}
+
+impl MessageBuilderExt for Message {
+    type Builder = Self;
 }
 
 impl<E> From<Message> for std::result::Result<Vec<Message>, E> {

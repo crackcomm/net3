@@ -6,8 +6,11 @@ use async_trait::async_trait;
 
 use crate::{
     builder::ClientHandle,
-    traits::{Handler, HandlerBuilder},
+    handle::Handle,
+    traits::{Handler, HandlerBuilder, Initializer},
 };
+
+use net3_msg::traits::Message;
 
 /// Default handler builder.
 #[derive(Clone)]
@@ -107,6 +110,67 @@ impl<H: Handler + Send> From<H> for TakeBuilder<H> {
     #[inline]
     fn from(handler: H) -> Self {
         TakeBuilder(Some(handler))
+    }
+}
+
+/// Connection initialization function type alias.
+pub type InitFunc<M, U = ()> = Box<dyn Fn(&Handle<M, U>) + Sync + Send + 'static>;
+
+/// Handler initialization function type alias.
+pub type HandlerInitFunc<H> = InitFunc<<H as Handler>::Message, <H as Handler>::Event>;
+
+/// Handler builder initialization function type alias.
+pub type BuilderInitFunc<B> = HandlerInitFunc<<B as HandlerBuilder>::Handler>;
+
+/// Initialization handler builder.
+pub struct InitBuilder<B: HandlerBuilder> {
+    inner: B,
+    init_funcs: Vec<BuilderInitFunc<B>>,
+}
+
+impl<B: HandlerBuilder + Send> InitBuilder<B> {
+    pub fn add_init(&mut self, init: BuilderInitFunc<B>) {
+        self.init_funcs.push(init);
+    }
+}
+
+#[async_trait]
+impl<B: HandlerBuilder + Send> HandlerBuilder for InitBuilder<B> {
+    type Handler = <B as HandlerBuilder>::Handler;
+
+    #[inline]
+    async fn build_handler(&mut self, handle: &ClientHandle<Self::Handler>) -> Self::Handler {
+        for init in &self.init_funcs {
+            (*init)(handle);
+        }
+        self.inner.build_handler(handle).await
+    }
+}
+
+impl<B: HandlerBuilder + Send> From<B> for InitBuilder<B> {
+    fn from(inner: B) -> Self {
+        InitBuilder {
+            inner,
+            init_funcs: vec![],
+        }
+    }
+}
+
+/// Closure initialization helper.
+pub struct InitClosure<M: Message, U> {
+    inner: InitFunc<M, U>,
+}
+
+#[async_trait]
+impl<M: Message, U: Send> Initializer<M, U> for InitClosure<M, U> {
+    async fn init(&mut self, handle: &Handle<M, U>) -> std::io::Result<()> {
+        (*self.inner)(handle);
+        Ok(())
+    }
+}
+impl<M: Message, U: Send> From<InitFunc<M, U>> for InitClosure<M, U> {
+    fn from(inner: InitFunc<M, U>) -> Self {
+        InitClosure { inner }
     }
 }
 

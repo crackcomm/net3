@@ -125,6 +125,12 @@ impl ErrorKind {
     }
 }
 
+impl From<i64> for ErrorKind {
+    fn from(code: i64) -> Self {
+        ErrorKind::ErrorCode(code)
+    }
+}
+
 impl fmt::Display for ErrorKind {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -133,7 +139,7 @@ impl fmt::Display for ErrorKind {
 }
 
 /// Message error type.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Error {
     /// Error kind or error code.
     pub kind: ErrorKind,

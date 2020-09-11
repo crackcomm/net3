@@ -20,7 +20,7 @@ use tokio::{
 use tokio_util::codec::{Decoder, Encoder};
 
 use crate::{
-    common::CloneBuilder,
+    common::{BuilderInitFunc, CloneBuilder, InitClosure},
     handle::{Handle, InnerHandle},
     handler::{internal::ClientMessage, ClientHandler, ClonedReceiver},
     notifications::{NotificationHandler, Notifications},
@@ -294,6 +294,18 @@ impl<C: Decoder, B: HandlerBuilder> Builder<C, B> {
     {
         self.initializers.push(Box::new(init));
         self
+    }
+
+    /// Adds client [`Initializer`] builder structure from boxed closure.
+    ///
+    /// [`Initializer`]: ./traits/trait.Initializer.html
+    #[inline]
+    pub fn with_init_fn<I>(self, init: BuilderInitFunc<B>) -> Self
+    where
+        <<B as HandlerBuilder>::Handler as Handler>::Message: 'static,
+        <<B as HandlerBuilder>::Handler as Handler>::Event: 'static,
+    {
+        self.with_init(InitClosure::from(init))
     }
 
     /// Creates a clone-able client [`Handle`].

@@ -32,3 +32,5 @@ pub use self::builder::*;
 pub use self::handle::*;
 pub use self::notifications::*;
 pub use self::traits::*;
+
+pub use net3_rpc_error::*;

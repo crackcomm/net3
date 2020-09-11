@@ -131,7 +131,7 @@ impl<M: Message, U> Handle<M, U> {
     ) -> Result<R> {
         match self.request_opt(method, params).await? {
             Some(res) => Ok(res),
-            None => Err(Error::from(ErrorKind::InvalidData).into()),
+            None => Err(Error::new(ErrorKind::InvalidData, "empty response").into()),
         }
     }
 
@@ -153,8 +153,16 @@ impl<M: Message, U> Handle<M, U> {
     ///
     /// Otherwise one would have to use confusing `None as Option<&()>`.
     #[instrument(skip(self))]
-    pub async fn request_no_params<R: DeserializeOwned>(&self, method: &str) -> Result<Option<R>> {
+    pub async fn request_empty<R: DeserializeOwned>(&self, method: &str) -> Result<R> {
         self.request(method, None as Option<&()>).await
+    }
+
+    /// Helper for sending requests with no parameters.
+    ///
+    /// Otherwise one would have to use confusing `None as Option<&()>`.
+    #[instrument(skip(self))]
+    pub async fn request_empty_opt<R: DeserializeOwned>(&self, method: &str) -> Result<Option<R>> {
+        self.request_opt(method, None as Option<&()>).await
     }
 
     /// Sends a method call request to a network channel.

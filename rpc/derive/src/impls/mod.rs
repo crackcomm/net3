@@ -46,8 +46,15 @@ fn make_method_message_handler(def: &MethodDef) -> TokenStream2 {
     quote! {
         #method_name => {
             let params = message.read()?;
-            let response = self. #name (&params).await?;
-            Ok(builder::new_response::<M>(&message).with_data(&response)?.build())
+            match self. #name (&params).await {
+                Ok(response) => {
+                    Ok(builder::new_response::<M>(&message).with_data(&response)?.build())
+                },
+                Err(Error::Rpc(err)) => {
+                    Ok(builder::new_error_response::<M>(&message, err).build())
+                },
+                Err(Error::Io(err)) => Err(err),
+            }
         },
     }
 }
@@ -73,7 +80,6 @@ fn make_request_method(def: &MethodDef) -> TokenStream2 {
 }
 
 fn make_method_client(def: &MethodDef) -> TokenStream2 {
-    // let definition = &def.definition;
     let sig = def.signature();
     let name = &sig.ident;
     let inputs = &sig.inputs;
@@ -155,22 +161,19 @@ pub fn make_rpc(item: ItemTrait) -> Result<TokenStream2> {
                 ]
             }
 
-            async fn handle_message<M>(&mut self, message: M) -> net3_rpc_error::Result<M>
+            async fn handle_message<M>(&mut self, message: M) -> std::io::Result<M>
             where
                 M: net3_msg::traits::Message + 'static,
                 // M: net3_msg::builder::MessageBuilder<M>,
             {
-                use net3_msg::{
-                    builder,
-                    types::ErrorKind,
-                    prelude::*,
-                };
+                use net3_msg::prelude::*;
+                use net3_rpc_error::Error;
                 let method = message.method().expect("method name");
                 match method {
                     #(#method_handlers)*
-                    method => Ok(builder::new_error_response::<M, String>(
+                    method => Ok(builder::new_error_response::<M>(
                         &message,
-                        ErrorKind::MethodNotFound.into(),
+                        net3_msg::types::ErrorKind::MethodNotFound.into(),
                     )
                     .build()),
                 }

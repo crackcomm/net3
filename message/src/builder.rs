@@ -51,7 +51,7 @@ pub fn new_response<T: MessageBuilderExt>(request: &T) -> <T as MessageBuilderEx
 }
 
 /// Creates a new error response message builder.
-pub fn new_error_response<T: MessageBuilderExt, D: ToString>(
+pub fn new_error_response<T: MessageBuilderExt>(
     request: &T,
     error: types::Error,
 ) -> <T as MessageBuilderExt>::Builder {
@@ -78,6 +78,16 @@ pub trait MessageBuilder<M: Sized>: Sized {
     fn with_data<T: Serialize>(mut self, data: &T) -> std::io::Result<Self> {
         self.set_data(data)?;
         Ok(self)
+    }
+
+    fn with_event_name<T: ToString>(mut self, name: T) -> Self {
+        self.set_event_name(name);
+        self
+    }
+
+    fn with_method_name<T: ToString>(mut self, method: T) -> Self {
+        self.set_method_name(method);
+        self
     }
 
     fn new_event<T: ToString>(name: T) -> Self {
