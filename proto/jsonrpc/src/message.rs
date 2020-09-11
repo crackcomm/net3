@@ -137,7 +137,11 @@ impl MessageBuilder<Message> for Message {
     }
 
     fn set_data<T: Serialize>(&mut self, data: &T) -> Result<()> {
-        self.params = Params::new(data)?;
+        if self.method.is_none() {
+            self.result = Params::new(data)?;
+        } else {
+            self.params = Params::new(data)?;
+        }
         Ok(())
     }
 
