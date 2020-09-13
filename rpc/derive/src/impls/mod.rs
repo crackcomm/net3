@@ -181,7 +181,7 @@ pub fn make_rpc(item: ItemTrait) -> Result<TokenStream2> {
         }
 
         #[async_trait::async_trait]
-        impl<M: net3_msg::traits::Message> Rpc for net3_rpc_client::Handle<M> {
+        impl<M: net3_msg::traits::Message> #rpc_trait_name for net3_rpc_client::Handle<M> {
             #(#methods_client)*
         }
 
