@@ -164,7 +164,6 @@ pub fn make_rpc(item: ItemTrait) -> Result<TokenStream2> {
             async fn handle_message<M>(&mut self, message: M) -> std::io::Result<M>
             where
                 M: net3_msg::traits::Message + 'static,
-                // M: net3_msg::builder::MessageBuilder<M>,
             {
                 use net3_msg::prelude::*;
                 use net3_rpc_error::Error;
