@@ -191,7 +191,6 @@ impl<H: Handler + 'static> Stream for ClientHandler<H> {
                     log::trace!("client handles are all dropped");
                     Poll::Ready(None)
                 } else {
-                    cx.waker().wake_by_ref();
                     Poll::Pending
                 }
             }
