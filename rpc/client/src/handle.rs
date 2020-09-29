@@ -113,6 +113,7 @@ impl<M: Message, U> Handle<M, U> {
 
     /// Emits internal event.
     pub fn emit_internal(&self, event: U) -> std::io::Result<()> {
+        log::trace!("Emit internal event");
         self.inner
             .events
             .send(event)
