@@ -103,6 +103,7 @@ where
         &mut self,
         event: Self::InternalEvent,
     ) -> Result<Vec<Self::RemoteMessage>> {
+        log::trace!("Forwarding internal event");
         self.handler.handle_internal_event(event).await
     }
 
