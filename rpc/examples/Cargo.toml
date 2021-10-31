@@ -11,8 +11,6 @@ serde = "^1"
 serde_derive = "^1"
 async-trait = "*"
 
-# ice_net_channel = { path = "../../channel" }
-
 net3_msg = { path = "../../message" }
 net3_rpc_error = { path = "../error" }
 net3_rpc_derive = { path = "../derive" }
@@ -20,10 +18,6 @@ net3_rpc_client = { path = "../client" }
 net3_rpc_server = { path = "../server" }
 net3_codec_json_lines = { path = "../../codec/json-lines" }
 
-# ice_net_message = { path = "../../../../icemining/stratum-v3/core/transport/message" }
-# ice_jsonrpc_codec = { path = "../../../proto/jsonrpc/codec" }
-# ice_jsonrpc_message = { path = "../../../proto/jsonrpc/message" }
-
-tokio = { version = "^0.2", features = ["full"] }
+tokio = { version = "^1", features = ["full"] }
 
 pretty_env_logger = "*"

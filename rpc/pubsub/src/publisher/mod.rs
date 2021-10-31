@@ -4,10 +4,9 @@ use std::io::{Error, ErrorKind};
 
 use serde::ser::Serialize;
 
-use tokio::{stream::StreamExt, sync::mpsc};
+use tokio::sync::mpsc;
+use tokio_stream::{StreamExt, wrappers::UnboundedReceiverStream};
 
-// use ice_msgpack_proto::{client::Handle, server, Message};
-// use ice_net_channel::router::{Builder as Router, InitFunc};
 use net3_msg::{builder, traits::Message};
 use net3_rpc_client::{common::InitFunc, Handle};
 
@@ -55,11 +54,13 @@ impl<M: Message + 'static, U: 'static + Send> Builder<M, U> {
     }
 
     /// Binds a publisher to a TCP address and starts publisher loop.
-    pub async fn start(mut self) -> std::io::Result<()> {
+    pub async fn start(self) -> std::io::Result<()> {
         let mut handles = Vec::new();
+        let mut msg_receiver = UnboundedReceiverStream::new(self.msg_receiver);
+        let mut hnd_receiver = UnboundedReceiverStream::new(self.hnd_receiver);
         loop {
             tokio::select! {
-                message = self.msg_receiver.next() => match message {
+                message = msg_receiver.next() => match message {
                     Some(message) => {
                         handles = handles
                             .into_iter()
@@ -70,7 +71,7 @@ impl<M: Message + 'static, U: 'static + Send> Builder<M, U> {
                     },
                     None => return Ok(()),
                 },
-                handle = self.hnd_receiver.next() => match handle {
+                handle = hnd_receiver.next() => match handle {
                     Some(handle) => handles.push(handle),
                     None => return Ok(()),
                 }
@@ -91,17 +92,6 @@ impl<M: Message + 'static, U: 'static + Send> Builder<M, U> {
             let _ = sender.send(handle.clone());
         })
     }
-
-    // /// Creates a new publisher server.
-    // pub fn server<E>(&self) -> Server<E>
-    // where
-    //     E: From<std::io::Error>,
-    //     E: From<Error> + Debug + Display + Send + Sync + 'static,
-    // {
-    //     let mut builder = Router::default();
-    //     builder.add_init_box(self.server_init_fn());
-    //     Server { router: builder }
-    // }
 }
 
 impl<M: Message, U> Default for Builder<M, U> {
@@ -116,13 +106,3 @@ impl<M: Message, U> Default for Builder<M, U> {
         }
     }
 }
-
-// pub struct Server<E: From<Error>> {
-//     pub router: Router<Message, E>,
-// }
-
-// impl<E: From<Error>> Server<E> {
-//     pub fn build(self) -> server::Builder<Router<Message, E>> {
-//         server::Server::builder(self.router)
-//     }
-// }

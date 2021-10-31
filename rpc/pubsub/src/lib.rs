@@ -1,5 +1,4 @@
 //! Internal job channels providing pub-sub and validation methods.
-#![feature(async_closure)]
 
 // #[macro_use]
 // extern crate failure;

@@ -2,7 +2,7 @@
 
 use std::io::{Error, ErrorKind, Result};
 
-use bytes::{buf::ext::BufExt, BytesMut};
+use bytes::{buf::Buf, BytesMut};
 use serde::{de::DeserializeOwned, Serialize};
 use tokio_util::codec::{Decoder, Encoder, LengthDelimitedCodec};
 

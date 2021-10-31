@@ -54,10 +54,10 @@ use std::{
 use async_trait::async_trait;
 use tokio::{
     net::{TcpListener, ToSocketAddrs},
-    stream::StreamExt,
     sync::Mutex,
     task::JoinHandle,
 };
+use tokio_stream::{StreamExt, wrappers::TcpListenerStream};
 use tokio_util::codec::{Decoder, Encoder};
 
 use net3_msg::traits::Message;
@@ -160,8 +160,8 @@ where
     }
 
     /// Starts accepting connections and handling requests.
-    pub async fn start(mut self) -> std::io::Result<()> {
-        let mut s = self.listener.incoming();
+    pub async fn start(self) -> std::io::Result<()> {
+        let mut s = TcpListenerStream::new(self.listener);
         let builder = RefBuilder {
             inner: Arc::new(Mutex::new(self.builder)),
         };

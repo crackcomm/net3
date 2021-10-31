@@ -10,7 +10,7 @@ use std::{
 use tokio::{
     io::Error,
     net::{TcpStream, ToSocketAddrs},
-    time::{delay_for, timeout},
+    time::{sleep, timeout},
 };
 use tokio_util::codec::Framed;
 
@@ -65,7 +65,7 @@ impl<C: Default> Channel<C> {
                 Ok(stream) => return stream,
                 Err(err) => {
                     log::trace!("Reconnect {:?} error: {}", addr, err);
-                    delay_for(retry_interval).await;
+                    sleep(retry_interval).await;
                     continue;
                 }
             }

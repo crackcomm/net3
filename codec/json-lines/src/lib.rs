@@ -8,7 +8,7 @@
 use std::io::{Error, ErrorKind};
 
 use bytes::{
-    buf::{ext::BufMutExt, BufMut},
+    buf::BufMut,
     BytesMut,
 };
 use serde::{de::DeserializeOwned, Serialize};
