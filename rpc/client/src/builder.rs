@@ -16,6 +16,7 @@ use tokio::{
         Mutex,
     },
     task::JoinHandle,
+    time::delay_for,
 };
 use tokio_util::codec::{Decoder, Encoder};
 
@@ -468,7 +469,14 @@ where
             .await
             {
                 Ok(()) => continue,
-                Err(err) => log::trace!("Connection error: {:?}, reconnecting.", err),
+                Err(err) => {
+                    delay_for(self.reconnect_interval).await;
+                    log::trace!(
+                        "Connection error: {:?}, reconnecting in {:?}.",
+                        err,
+                        self.reconnect_interval
+                    );
+                }
             }
         }
     }
