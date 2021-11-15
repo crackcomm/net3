@@ -1,6 +1,6 @@
 //! Common client utilities.
 
-use std::marker::PhantomData;
+use std::{io::Result, marker::PhantomData};
 
 use async_trait::async_trait;
 
@@ -39,11 +39,14 @@ pub struct CloneBuilder<H: Clone>(pub H);
 
 #[async_trait]
 impl<H: Handler + Send + Clone> HandlerBuilder for CloneBuilder<H> {
-    type Handler = H;
+    type Handler = ClonedHandler<H>;
 
     #[inline]
-    async fn build_handler(&mut self, _: &ClientHandle<Self::Handler>) -> Self::Handler {
-        self.0.clone()
+    async fn build_handler(&mut self, handle: &ClientHandle<Self::Handler>) -> Self::Handler {
+        ClonedHandler {
+            handler: self.0.clone(),
+            handle: handle.clone(),
+        }
     }
 }
 
@@ -51,6 +54,36 @@ impl<H: Handler + Send + Clone> From<H> for CloneBuilder<H> {
     #[inline]
     fn from(handler: H) -> Self {
         CloneBuilder(handler)
+    }
+}
+
+/// Cloned handler.
+///
+/// It preserves a `ClientHandle<H>` so it doesn't get dropped.
+pub struct ClonedHandler<H: Handler> {
+    handler: H,
+    #[allow(dead_code)]
+    handle: ClientHandle<H>,
+}
+
+#[async_trait]
+impl<H: Handler + Send> Handler for ClonedHandler<H> {
+    type Event = H::Event;
+    type Message = H::Message;
+
+    /// Handles event message.
+    async fn handle_notification(&mut self, message: Self::Message) -> Result<Vec<Self::Message>> {
+        self.handler.handle_notification(message).await
+    }
+
+    /// Handles request message.
+    async fn handle_request(&mut self, message: Self::Message) -> Result<Vec<Self::Message>> {
+        self.handler.handle_request(message).await
+    }
+
+    /// Handles internal event.
+    async fn handle_internal_event(&mut self, event: Self::Event) -> Result<Vec<Self::Message>> {
+        self.handler.handle_internal_event(event).await
     }
 }
 
